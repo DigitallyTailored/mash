@@ -1,0 +1,77 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          APP_NAME: mash
+        run: |
+          # Setup SSH
+          sudo apt-get update -y && sudo apt-get install -y openssh-client
+          eval $(ssh-agent -s)
+          echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          # Deploy using sudo to execute commands as mash user
+          # to see logs `ssh -p22 ubuntu@51.195.219.163` `sudo -u mash bash` and then `pm2 logs --lines 100`
+          ssh -o StrictHostKeyChecking=no -p22 ubuntu@51.195.219.163 "
+           # Execute commands as mash user with proper authentication
+           sudo -u mash bash -c '
+            # Set up environment
+            cd ~/htdocs/$APP_NAME.curato.io/
+            export NVM_DIR=\"\$HOME/.nvm\"
+            [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"
+          
+            # Set Git credentials for this session (GitHub)
+            git config credential.helper \"store --file=/tmp/git-credentials-$$\"
+            echo \"https://${GH_TOKEN}@github.com\" > /tmp/git-credentials-$$
+          
+            # Check if git repository exists, if not clone it
+            if [ ! -d .git ]; then
+              echo \"Repository not found. Cloning fresh copy...\"
+              # Clear directory if it exists but is not a git repo
+              rm -rf * .[^.]*
+              git clone https://${GH_TOKEN}@github.com/DigitallyTailored/mash.git .
+            else
+              echo \"Repository exists. Updating...\"
+              # Make sure Git is using HTTPS with token
+              git remote set-url origin https://${GH_TOKEN}@github.com/DigitallyTailored/mash.git
+          
+              # Pull the latest code
+              git pull origin main
+            fi
+          
+            # Install dependencies and build
+            npm ci --cache .npm
+            npm run build
+            # npm ci --production
+          
+            # Ensure PM2 is installed globally
+            npm install pm2@latest -g
+          
+            # Stop existing PM2 process if it exists
+            pm2 stop $APP_NAME 2>/dev/null || true
+          
+            #required to reload env variables
+            pm2 delete $APP_NAME
+          
+            # Start the application with PM2 on port 3001
+            PORT=3001 pm2 start build/index.js --name $APP_NAME --node-args=\"--expose-gc\"
+          
+            # Save PM2 process list to automatically restart on server reboot
+            pm2 save
+          
+            # Clean up credentials
+            rm -f /tmp/git-credentials-$$
+           '
+          "

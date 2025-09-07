@@ -65,15 +65,15 @@ export const playDingSound = () => {
 }
 
 export const playEliminationSound = () => {
-    playSound('elimination', 0.6)
+    playSound('elimination', 0.5)
 }
 
 export const playCategoryCompletedSound = () => {
-    playSound('categoryCompleted', 0.7)
+    playSound('categoryCompleted', 0.8)
 }
 
 export const playFanfareSound = () => {
-    playSound('fanfare', 0.8)
+    playSound('fanfare', 0.9)
 }
 
 export const playPrimaryButtonSound = () => {
