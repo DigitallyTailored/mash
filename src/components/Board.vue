@@ -330,13 +330,11 @@ const buildItemsList = () => {
     allItems.push(`house-${index}`)
   })
 
-  // Add other categories
-  Object.keys(props.categories).forEach(key => {
-    if (key !== 'house') {
-      props.categories[key].options.forEach((_: string, index: number) => {
-        allItems.push(`${key}-${index}`)
-      })
-    }
+  // Add other categories in the same order as displayed using the existing computed property
+  nonHouseCategories.value.forEach(category => {
+    category.options.forEach((_: string, index: number) => {
+      allItems.push(`${category.key}-${index}`)
+    })
   })
 }
 
