@@ -47,6 +47,7 @@ The built files will be in the `dist/` directory.
 
 - `src/components/` - Vue components for game phases
 - `src/data/gameData.ts` - Game categories and random options
+- `src/constants/gameConstants.ts` - Constants used throughout - files, order, emojis etc
 - `src/utils/` - Audio, visual effects, and storage utilities
 - `src/style.css` - Global styles and animations
 

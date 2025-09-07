@@ -21,13 +21,13 @@
             v-if="hasMorePlayers"
             @click="nextPlayer"
             class="button is-primary"
-            ref="nextPlayerBtn"
+            :ref="el => setRef(el, 'nextPlayerBtn')"
         >
           Next Player
         </button>
       </div>
       <div class="control">
-        <button @click="newGame" class="button is-success" ref="newGameBtn">
+        <button @click="newGame" class="button is-success" :ref="el => setRef(el, 'newGameBtn')">
           New Game
         </button>
       </div>
@@ -38,10 +38,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 import GameHistory from './GameHistory.vue'
 import { playPrimaryButtonSound, playSuccessButtonSound } from '../utils/audio'
 import { playButtonClickEffect } from '../utils/effects'
+import { createRefManager } from '../utils/refs'
+import { CATEGORIES, type CategoryKey } from '../constants/gameConstants'
 
 const props = defineProps<{
   result: any
@@ -51,8 +53,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['next-player', 'new-game', 'back-to-setup'])
 
-const nextPlayerBtn = ref<HTMLElement>()
-const newGameBtn = ref<HTMLElement>()
+const { setRef, getRef } = createRefManager<HTMLElement>()
 
 const hasMorePlayers = computed(() => {
   const currentIndex = props.allPlayers.indexOf(props.currentPlayer)
@@ -60,29 +61,18 @@ const hasMorePlayers = computed(() => {
 })
 
 const formatLabel = (key: string) => {
-  const labels: Record<string, string> = {
-    house: '🏠 Home',
-    spouse: '💕 Spouse',
-    children: '👶 Children',
-    job: '💼 Job',
-    car: '🚗 Car',
-    location: '📍 Location',
-    salary: '💰 Salary'
-  }
-  return labels[key] || key
+  return CATEGORIES[key as CategoryKey]?.title || key
 }
 
 const nextPlayer = () => {
   playPrimaryButtonSound()
-  playButtonClickEffect(nextPlayerBtn.value)
+  playButtonClickEffect(getRef('nextPlayerBtn'))
   emit('next-player')
 }
 
 const newGame = () => {
   playSuccessButtonSound()
-  playButtonClickEffect(newGameBtn.value)
+  playButtonClickEffect(getRef('newGameBtn'))
   emit('new-game')
 }
-
-const backToSetup = () => emit('back-to-setup')
 </script>

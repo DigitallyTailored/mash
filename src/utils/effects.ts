@@ -2,7 +2,7 @@ import confetti from 'canvas-confetti'
 
 // Small confetti when a single item is eliminated
 export const playEliminationEffect = (element?: HTMLElement) => {
-    let origin = { x: 0, y: 0.6 }
+    let origin = { x: 0.5, y: 0.5 }
 
     if (element) {
         const rect = element.getBoundingClientRect()
@@ -15,7 +15,7 @@ export const playEliminationEffect = (element?: HTMLElement) => {
         particleCount: 25,
         spread: 40,
         origin,
-        colors: ['#ff6b6b', '#4ecdc4', '#45b7d1'],
+        colors: ['#ffb200', '#eeff00', '#ff4e00'],
         startVelocity: 20,
         gravity: 1,
         drift: 0,
@@ -25,7 +25,7 @@ export const playEliminationEffect = (element?: HTMLElement) => {
 
 // Medium confetti when a category is completed (only 1 item left)
 export const playCategoryCompletedEffect = (element?: HTMLElement) => {
-    let origin = { x: 0.6, y: 0.6 }
+    let origin = { x: 0.5, y: 0.5 }
 
     if (element) {
         const rect = element.getBoundingClientRect()
@@ -35,13 +35,13 @@ export const playCategoryCompletedEffect = (element?: HTMLElement) => {
     }
 
     // Multiple bursts for category completion
-    const colors = ['#f9ca24', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe']
+    const colors = ['#2456f9', '#f0932b', '#eb4d4b', '#6c5ce7', '#a29bfe']
 
     for (let i = 0; i < 3; i++) {
         setTimeout(() => {
             confetti({
                 particleCount: 60,
-                spread: 60,
+                spread: 70,
                 origin,
                 colors,
                 startVelocity: 30,

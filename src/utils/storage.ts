@@ -1,3 +1,5 @@
+import { GAME_CONSTANTS } from '../constants/gameConstants'
+
 const STORAGE_KEY = 'mash-game-history'
 
 export interface GameResult {
@@ -24,8 +26,8 @@ export const saveGameResult = (player: string, result: any) => {
 
     history.push(gameResult)
 
-    // Keep only last 50 results
-    if (history.length > 50) {
+    // Keep only last N results using constant
+    if (history.length > GAME_CONSTANTS.MAX_HISTORY_ENTRIES) {
         history.shift()
     }
 

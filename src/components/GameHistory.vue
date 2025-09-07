@@ -3,7 +3,7 @@
     <div class="card-header py-2">
       <div class="card-header-title is-size-6">📚 Game History</div>
       <div class="card-header-icon">
-        <button @click="clearHistory" class="button is-small is-danger" ref="clearBtn">
+        <button @click="clearHistory" class="button is-small is-danger" :ref="el => setRef(el, 'clearBtn')">
           Clear
         </button>
       </div>
@@ -28,7 +28,6 @@
               </div>
             </div>
           </div>
-          <!-- Changed to 2 rows instead of 3 -->
           <div class="columns is-multiline is-mobile">
             <div class="column is-half-mobile is-half-tablet is-3-desktop" v-for="(value, key) in game.result" :key="key">
               <small class="is-size-7">{{ formatLabel(key) }}:</small><br>
@@ -46,9 +45,11 @@ import { ref, onMounted } from 'vue'
 import { getGameHistory, clearGameHistory } from '../utils/storage'
 import { playDangerButtonSound } from '../utils/audio'
 import { playButtonClickEffect } from '../utils/effects'
+import { createRefManager } from '../utils/refs'
+import { CATEGORIES, type CategoryKey } from '../constants/gameConstants'
 
 const history = ref<any[]>([])
-const clearBtn = ref<HTMLElement>()
+const { setRef, getRef } = createRefManager<HTMLElement>()
 
 const loadHistory = () => {
   history.value = getGameHistory()
@@ -58,7 +59,7 @@ const clearHistory = () => {
   clearGameHistory()
   history.value = []
   playDangerButtonSound()
-  playButtonClickEffect(clearBtn.value)
+  playButtonClickEffect(getRef('clearBtn'))
 }
 
 const formatDate = (timestamp: number) => {
@@ -66,16 +67,7 @@ const formatDate = (timestamp: number) => {
 }
 
 const formatLabel = (key: string) => {
-  const labels: Record<string, string> = {
-    house: '🏠 Home',
-    spouse: '💕 Spouse',
-    children: '👶 Children',
-    job: '💼 Job',
-    car: '🚗 Car',
-    location: '📍 Location',
-    salary: '💰 Salary'
-  }
-  return labels[key] || key
+  return CATEGORIES[key as CategoryKey]?.title || key
 }
 
 onMounted(() => {
